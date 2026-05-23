@@ -1,7 +1,7 @@
 """
 CIPHER SOVEREIGN — Desktop App Launcher
-Starts the FastAPI server in a background thread, then opens
-the dashboard in a native Qt6 window. No browser required.
+Starts Ollama, then the FastAPI server, then opens the
+dashboard in a native Qt6 window. One double-click does everything.
 """
 
 import sys
@@ -9,9 +9,18 @@ import os
 import threading
 import time
 import signal
+import subprocess
+import urllib.request
 
 # ── make sure we run from the script directory ──────────────
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+# ── Ollama location on this machine ─────────────────────────
+OLLAMA_EXE = os.path.expandvars(
+    r"%LOCALAPPDATA%\Programs\Ollama\ollama.exe"
+)
+OLLAMA_URL  = "http://localhost:11434"
+OLLAMA_MODEL = "deepseek-r1:8b"   # preferred model — falls back to any installed
 
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout,
@@ -28,46 +37,103 @@ SERVER_PORT = 3131
 
 # ── signals bridge (thread → Qt) ────────────────────────────
 class Bridge(QObject):
-    server_ready = pyqtSignal()
+    status_update = pyqtSignal(str)   # progress text
+    server_ready  = pyqtSignal()
     server_failed = pyqtSignal(str)
 
 
 bridge = Bridge()
 
 
-# ── start FastAPI server in background thread ────────────────
-def start_server():
-    """Boot the FastAPI server. Signals when ready."""
+# ── helpers ──────────────────────────────────────────────────
+def _ollama_running() -> bool:
     try:
-        import uvicorn
-        from cipher_server import app
-        config = uvicorn.Config(
-            app,
-            host="127.0.0.1",
-            port=SERVER_PORT,
-            log_level="warning",   # quiet — errors only
-            loop="asyncio"
-        )
-        server = uvicorn.Server(config)
+        urllib.request.urlopen(f"{OLLAMA_URL}/api/tags", timeout=2)
+        return True
+    except Exception:
+        return False
 
-        # Poll until bound, then signal Qt
-        def _watch():
-            for _ in range(40):          # up to 20s
-                time.sleep(0.5)
-                try:
-                    import urllib.request
-                    urllib.request.urlopen(f"{SERVER_URL}/status", timeout=2)
-                    bridge.server_ready.emit()
-                    return
-                except Exception:
-                    pass
-            bridge.server_failed.emit("Server didn't respond after 20s")
 
-        threading.Thread(target=_watch, daemon=True).start()
-        server.run()
+def _server_running() -> bool:
+    try:
+        urllib.request.urlopen(f"{SERVER_URL}/status", timeout=2)
+        return True
+    except Exception:
+        return False
 
-    except Exception as e:
-        bridge.server_failed.emit(str(e))
+
+# ── boot sequence (runs in background thread) ────────────────
+def boot_sequence():
+    """
+    1. Start Ollama if not running
+    2. Start FastAPI server
+    3. Signal Qt when ready
+    """
+    # ── Step 1: Ollama ───────────────────────────────────────
+    if not _ollama_running():
+        bridge.status_update.emit("STARTING OLLAMA ENGINE...")
+        if os.path.exists(OLLAMA_EXE):
+            subprocess.Popen(
+                [OLLAMA_EXE, "serve"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=subprocess.CREATE_NO_WINDOW  # no extra terminal
+            )
+        else:
+            # Fallback: try PATH
+            try:
+                subprocess.Popen(
+                    ["ollama", "serve"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+            except FileNotFoundError:
+                bridge.server_failed.emit(
+                    "Ollama not found. Install from https://ollama.com"
+                )
+                return
+
+        # Wait up to 20s for Ollama to respond
+        for i in range(40):
+            time.sleep(0.5)
+            if _ollama_running():
+                bridge.status_update.emit("OLLAMA ONLINE — LOADING MODEL...")
+                break
+        else:
+            bridge.server_failed.emit("Ollama started but didn't respond in 20s")
+            return
+    else:
+        bridge.status_update.emit("OLLAMA ONLINE — STARTING CIPHER...")
+
+    # ── Step 2: FastAPI server ───────────────────────────────
+    bridge.status_update.emit("INITIALIZING CIPHER SERVER...")
+
+    def _run_server():
+        try:
+            import uvicorn
+            from cipher_server import app
+            config = uvicorn.Config(
+                app,
+                host="127.0.0.1",
+                port=SERVER_PORT,
+                log_level="warning",
+                loop="asyncio"
+            )
+            uvicorn.Server(config).run()
+        except Exception as e:
+            bridge.server_failed.emit(str(e))
+
+    threading.Thread(target=_run_server, daemon=True).start()
+
+    # ── Step 3: Wait for server to be ready ──────────────────
+    for _ in range(40):
+        time.sleep(0.5)
+        if _server_running():
+            bridge.status_update.emit("CIPHER SOVEREIGN ONLINE")
+            bridge.server_ready.emit()
+            return
+
+    bridge.server_failed.emit("Cipher server didn't respond after 20s")
 
 
 # ── custom web page (suppress JS console noise) ─────────────
@@ -132,6 +198,7 @@ class CipherWindow(QMainWindow):
         self.blink_timer.start(600)
 
         # ── connect server signals ───────────────────────────
+        bridge.status_update.connect(self._on_status_update)
         bridge.server_ready.connect(self._on_server_ready)
         bridge.server_failed.connect(self._on_server_failed)
 
@@ -156,6 +223,9 @@ class CipherWindow(QMainWindow):
         self.dot_lbl.setStyleSheet(
             f"color:{'#C9A84C' if self._blink else '#1A3A55'}; font-size:14px;"
         )
+
+    def _on_status_update(self, msg: str):
+        self.status_lbl.setText(f"CIPHER SOVEREIGN  ·  {msg}")
 
     def _on_server_ready(self):
         self.blink_timer.stop()
@@ -193,9 +263,8 @@ class CipherWindow(QMainWindow):
 
 # ── entry point ──────────────────────────────────────────────
 def main():
-    # Start server in background before Qt starts
-    server_thread = threading.Thread(target=start_server, daemon=True)
-    server_thread.start()
+    # Kick off full boot sequence (Ollama → FastAPI → signal Qt)
+    threading.Thread(target=boot_sequence, daemon=True).start()
 
     app = QApplication(sys.argv)
     app.setApplicationName("Cipher Sovereign")
