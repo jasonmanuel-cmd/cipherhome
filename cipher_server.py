@@ -27,7 +27,10 @@ try:
 except ImportError:
     TTS_AVAILABLE = False
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logging.basicConfig(level=logging.WARNING, format="%(asctime)s %(levelname)s %(message)s")
+# Silence noisy httpx request logs
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 
 # ============================================================
 # CONFIG — edit .env or set these directly

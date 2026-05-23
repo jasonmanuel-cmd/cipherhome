@@ -250,6 +250,20 @@ class CipherWindow(QMainWindow):
         if ok:
             self.loading_bar.hide()
             self.browser.show()
+            # Force window to front and flash taskbar
+            self.raise_()
+            self.activateWindow()
+            self.setWindowState(
+                (self.windowState() & ~Qt.WindowState.WindowMinimized)
+                | Qt.WindowState.WindowActive
+            )
+        else:
+            # WebEngine failed — fall back to opening in browser
+            import webbrowser
+            webbrowser.open(SERVER_URL)
+            self.status_lbl.setText(
+                "CIPHER SOVEREIGN  ·  OPENED IN BROWSER  (http://localhost:3131)"
+            )
 
     def _on_server_failed(self, error):
         self.blink_timer.stop()
@@ -290,6 +304,8 @@ def main():
 
     window = CipherWindow()
     window.show()
+    window.raise_()          # bring to front
+    window.activateWindow()  # give it focus
 
     sys.exit(app.exec())
 
