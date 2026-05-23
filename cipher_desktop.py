@@ -93,14 +93,18 @@ def boot_sequence():
                 )
                 return
 
-        # Wait up to 20s for Ollama to respond
-        for i in range(40):
+        # Wait up to 60s for Ollama to respond
+        bridge.status_update.emit("WAITING FOR OLLAMA... (up to 60s)")
+        for i in range(120):
             time.sleep(0.5)
             if _ollama_running():
                 bridge.status_update.emit("OLLAMA ONLINE — LOADING MODEL...")
                 break
+            # Update counter every 5s so user sees progress
+            if i % 10 == 0 and i > 0:
+                bridge.status_update.emit(f"WAITING FOR OLLAMA... ({i//2}s)")
         else:
-            bridge.server_failed.emit("Ollama started but didn't respond in 20s")
+            bridge.server_failed.emit("Ollama started but didn't respond in 60s")
             return
     else:
         bridge.status_update.emit("OLLAMA ONLINE — STARTING CIPHER...")
@@ -126,14 +130,14 @@ def boot_sequence():
     threading.Thread(target=_run_server, daemon=True).start()
 
     # ── Step 3: Wait for server to be ready ──────────────────
-    for _ in range(40):
+    for _ in range(60):
         time.sleep(0.5)
         if _server_running():
             bridge.status_update.emit("CIPHER SOVEREIGN ONLINE")
             bridge.server_ready.emit()
             return
 
-    bridge.server_failed.emit("Cipher server didn't respond after 20s")
+    bridge.server_failed.emit("Cipher server didn't respond after 30s")
 
 
 # ── custom web page (suppress JS console noise) ─────────────
