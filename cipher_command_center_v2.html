@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CIPHER SOVEREIGN v2 — COAI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;700&family=Orbitron:wght@700;900&display=swap');
+:root{--navy:#04111F;--navy2:#081929;--navy3:#0D2137;--red:#CC2936;--red2:#FF3D4A;--blue:#1E6091;--blue2:#2A8FCC;--gold:#C9A84C;--text:#B8D4E8;--text2:#7A9BB5;--border:#1A3A55;--green:#0FC070;--mono:'Share Tech Mono',monospace;--display:'Orbitron',sans-serif;--body:'Rajdhani',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--navy);color:var(--text);font-family:var(--body);}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.025) 2px,rgba(0,0,0,.025) 4px);pointer-events:none;z-index:9999;}
+.top{background:var(--navy2);border-bottom:1px solid var(--border);padding:7px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;height:46px;}
+.logo{display:flex;align-items:center;gap:10px;}
+.hex{width:28px;height:28px;background:var(--red);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;flex-shrink:0;}
+.logo-t{font-family:var(--display);font-size:13px;font-weight:900;letter-spacing:3px;color:#fff;}
+.logo-s{font-family:var(--mono);font-size:9px;color:var(--red);letter-spacing:2px;}
+.topright{display:flex;align-items:center;gap:10px;}
+.sr{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;color:var(--text2);}
+.dot{width:6px;height:6px;border-radius:50%;animation:pulse 2s infinite;}
+.dot.g{background:var(--green);}.dot.r{background:var(--red);}.dot.y{background:var(--gold);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.pill{border-radius:3px;padding:3px 8px;font-family:var(--mono);font-size:10px;letter-spacing:1px;}
+.pill-red{background:rgba(204,41,54,.15);border:1px solid rgba(204,41,54,.3);color:var(--red2);}
+#clock{font-family:var(--mono);font-size:11px;color:var(--text2);}
+.eng-sel{display:flex;gap:3px;}
+.eb{font-family:var(--mono);font-size:9px;padding:3px 7px;border-radius:2px;cursor:pointer;border:1px solid var(--border);background:none;color:var(--text2);letter-spacing:1px;transition:all .15s;}
+.eb.active{border-color:var(--red);color:var(--red2);background:rgba(204,41,54,.15);}
+.main{display:flex;height:calc(100vh - 46px);}
+.sidebar{width:52px;background:var(--navy2);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:6px 0;gap:2px;flex-shrink:0;overflow-y:auto;}
+.nb{width:42px;height:42px;border:none;background:none;cursor:pointer;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative;color:var(--text2);transition:all .15s;}
+.nb:hover{background:rgba(255,255,255,.05);color:var(--text);}
+.nb.active{background:rgba(204,41,54,.2);color:var(--red2);}
+.nb.active::after{content:'';position:absolute;right:0;top:8px;bottom:8px;width:2px;background:var(--red);border-radius:2px 0 0 2px;}
+.ni{font-size:15px;}.nl{font-family:var(--mono);font-size:7px;}
+.sdiv{width:28px;height:1px;background:var(--border);margin:2px 0;}
+.content{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.panel{display:none;flex:1;flex-direction:column;overflow:hidden;}
+.panel.active{display:flex;}
+.ph{background:var(--navy2);border-bottom:1px solid var(--border);padding:9px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.pt{font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:3px;color:#fff;}
+.ps{font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:1px;border-left:2px solid var(--border);padding-left:10px;}
+.ph-r{margin-left:auto;display:flex;gap:6px;}
+.pb{flex:1;overflow-y:auto;padding:12px 16px;}
+.pb::-webkit-scrollbar{width:4px;}.pb::-webkit-scrollbar-thumb{background:var(--border);}
+/* CMD */
+.cw{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.msgs{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px;}
+.msgs::-webkit-scrollbar{width:4px;}.msgs::-webkit-scrollbar-thumb{background:var(--border);}
+.msg{display:flex;flex-direction:column;gap:3px;}
+.mh{font-family:var(--mono);font-size:9px;letter-spacing:1px;display:flex;align-items:center;gap:6px;}
+.msg-u .mh{color:var(--blue2);}.msg-c .mh{color:var(--red2);}
+.mb{background:var(--navy3);border:1px solid var(--border);border-radius:2px;padding:10px 12px;font-size:14px;line-height:1.6;}
+.msg-u .mb{border-left:2px solid var(--blue);margin-right:40px;}
+.msg-c .mb{border-left:2px solid var(--red);}
+.mb strong{color:var(--red2);}.mb em{color:var(--gold);font-style:normal;}
+.mb code{font-family:var(--mono);font-size:11px;background:rgba(0,0,0,.3);padding:1px 4px;border-radius:2px;color:var(--green);}
+.typing-row{display:none;align-items:center;gap:4px;padding:6px 16px;font-family:var(--mono);font-size:10px;color:var(--red2);}
+.td{width:4px;height:4px;background:var(--red);border-radius:50%;animation:td 1.2s infinite;}
+.td:nth-child(2){animation-delay:.2s;}.td:nth-child(3){animation-delay:.4s;}
+@keyframes td{0%,100%{opacity:.3;transform:translateY(0);}50%{opacity:1;transform:translateY(-2px);}}
+.ia{border-top:1px solid var(--border);padding:10px 16px;display:flex;gap:8px;align-items:flex-end;background:var(--navy2);flex-shrink:0;}
+.ia-bar{padding:4px 16px;background:var(--navy2);border-top:1px solid rgba(255,255,255,.03);display:flex;gap:8px;align-items:center;flex-shrink:0;}
+.ipfx{font-family:var(--mono);font-size:12px;color:var(--red2);padding-bottom:10px;flex-shrink:0;}
+textarea.ci{flex:1;background:var(--navy3);border:1px solid var(--border);border-radius:2px;padding:8px 12px;color:var(--text);font-family:var(--body);font-size:14px;font-weight:500;resize:none;min-height:40px;max-height:120px;outline:none;transition:border-color .15s;}
+textarea.ci:focus{border-color:var(--blue);}
+textarea.ci::placeholder{color:var(--text2);font-style:italic;}
+.sb{background:var(--red);border:none;border-radius:2px;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;transition:background .15s;}
+.sb:hover{background:var(--red2);}.sb:disabled{background:var(--border);cursor:not-allowed;}
+.vbtn{width:40px;height:40px;border:1px solid var(--border);border-radius:2px;background:var(--navy3);cursor:pointer;font-size:16px;color:var(--text2);transition:all .15s;display:flex;align-items:center;justify-content:center;}
+.vbtn:hover{border-color:var(--blue2);color:var(--blue2);}
+.vbtn.listening{background:rgba(204,41,54,.25);border-color:var(--red2);color:var(--red2);animation:pulse .8s infinite;}
+.vbtn.speaking{border-color:var(--green);color:var(--green);}
+.iabtn{font-family:var(--mono);font-size:9px;padding:4px 8px;border-radius:2px;border:1px solid var(--border);background:none;color:var(--text2);cursor:pointer;letter-spacing:1px;transition:all .15s;}
+.iabtn:hover{border-color:var(--blue);color:var(--blue2);}
+.iabtn.on{border-color:var(--green);color:var(--green);}
+#vstatus{font-family:var(--mono);font-size:9px;color:var(--text2);}
+/* CARDS */
+.card{background:var(--navy3);border:1px solid var(--border);border-radius:2px;padding:12px;margin-bottom:8px;transition:border-color .15s;}
+.card:hover{border-color:var(--blue);}
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:8px;}
+.ct{font-size:15px;font-weight:700;color:#fff;flex:1;}
+.brow{display:flex;gap:4px;flex-wrap:wrap;}
+.b{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:2px;letter-spacing:1px;}
+.br{background:rgba(204,41,54,.2);color:var(--red2);border:1px solid rgba(204,41,54,.3);}
+.bg{background:rgba(15,192,112,.15);color:var(--green);border:1px solid rgba(15,192,112,.25);}
+.bb{background:rgba(30,96,145,.25);color:var(--blue2);border:1px solid rgba(30,96,145,.4);}
+.bgo{background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.3);}
+.bgr{background:rgba(255,255,255,.05);color:var(--text2);border:1px solid var(--border);}
+.cm{font-family:var(--mono);font-size:10px;color:var(--text2);line-height:1.8;}
+.cm span{color:var(--text);}
+.ca{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.bx{font-family:var(--mono);font-size:9px;padding:4px 10px;border-radius:2px;cursor:pointer;border:1px solid var(--border);background:none;color:var(--text2);letter-spacing:1px;transition:all .15s;}
+.bx:hover{border-color:var(--blue);color:var(--blue2);}
+.bx.p{border-color:var(--red);color:var(--red2);}
+.rbtn{font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:2px;border:1px solid var(--green);color:var(--green);background:none;cursor:pointer;}
+.slbl{font-family:var(--mono);font-size:9px;letter-spacing:3px;color:var(--text2);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.slbl::after{content:'';flex:1;height:1px;background:var(--border);}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.sc{background:var(--navy3);border:1px solid var(--border);border-radius:2px;padding:12px;text-align:center;}
+.sv{font-family:var(--display);font-size:22px;font-weight:700;color:#fff;display:block;}
+.sl{font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--text2);display:block;margin-top:2px;}
+.fr{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.fi{flex:1;min-width:100px;background:var(--navy3);border:1px solid var(--border);border-radius:2px;padding:7px 10px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;transition:border-color .15s;}
+.fi:focus{border-color:var(--blue);}
+.fsel{background:var(--navy3);border:1px solid var(--border);border-radius:2px;padding:7px 10px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;cursor:pointer;}
+.addb{background:var(--red);border:none;border-radius:2px;padding:7px 14px;color:#fff;font-family:var(--mono);font-size:10px;letter-spacing:1px;cursor:pointer;white-space:nowrap;}
+.addb:hover{background:var(--red2);}
+.empty{font-family:var(--mono);font-size:11px;color:var(--text2);text-align:center;padding:30px;letter-spacing:1px;}
+.fl-IMMEDIATE{border-left:3px solid var(--red2);}
+.fl-THIS_WEEK{border-left:3px solid var(--gold);}
+.fl-THIS_MONTH{border-left:3px solid var(--blue2);}
+/* BRIEF */
+.bblock{background:var(--navy3);border:1px solid var(--border);border-radius:2px;padding:14px;margin-bottom:10px;}
+.btitle{font-family:var(--display);font-size:10px;letter-spacing:3px;color:var(--red2);margin-bottom:8px;}
+.bbody{font-size:14px;line-height:1.7;white-space:pre-wrap;}
+.gbtn{background:linear-gradient(135deg,var(--red),#8B1521);border:none;border-radius:2px;padding:10px 20px;color:#fff;font-family:var(--display);font-size:11px;letter-spacing:2px;cursor:pointer;width:100%;margin-bottom:12px;}
+.gbtn:disabled{opacity:.5;cursor:not-allowed;}
+/* WATCH */
+.tl-GREEN{border-left:3px solid var(--green);}
+.tl-YELLOW{border-left:3px solid var(--gold);}
+.tl-ORANGE{border-left:3px solid orange;}
+.tl-RED{border-left:3px solid var(--red2);}
+.tl-BLACK{border-left:3px solid #fff;background:rgba(204,41,54,.1)!important;}
+/* PETS */
+.pg{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.pc{background:var(--navy3);border:1px solid var(--border);border-radius:2px;padding:14px;text-align:center;}
+/* MEM */
+.mc{background:var(--navy3);border:1px solid var(--border);border-radius:2px;padding:10px 12px;margin-bottom:6px;display:flex;gap:10px;}
+.mcat{font-family:var(--mono);font-size:8px;padding:2px 5px;border-radius:2px;flex-shrink:0;align-self:flex-start;margin-top:2px;}
+/* SETTINGS */
+.sg2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.srow{display:flex;flex-direction:column;gap:4px;}
+.slbl2{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--text2);}
+.sval{background:var(--navy3);border:1px solid var(--border);border-radius:2px;padding:7px 10px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;}
+.sval:focus{border-color:var(--blue);}
+.ssave{background:var(--red);border:none;border-radius:2px;padding:8px 20px;color:#fff;font-family:var(--display);font-size:10px;letter-spacing:2px;cursor:pointer;width:100%;margin-top:6px;}
+.ssave:hover{background:var(--red2);}
+.stag{background:rgba(15,192,112,.1);border:1px solid rgba(15,192,112,.25);border-radius:2px;padding:4px 10px;font-family:var(--mono);font-size:10px;color:var(--green);display:inline-block;margin-top:4px;}
+/* MOBILE */
+@media(max-width:700px){
+  html,body{overflow:auto;}
+  .main{flex-direction:column;height:auto;}
+  .sidebar{width:100%;flex-direction:row;padding:4px 6px;overflow-x:auto;height:52px;border-right:none;border-bottom:1px solid var(--border);}
+  .nb{width:52px;height:44px;flex-shrink:0;}
+  .nb.active::after{right:8px;top:auto;bottom:0;left:8px;width:auto;height:2px;border-radius:2px 2px 0 0;}
+  .sdiv{width:1px;height:28px;margin:0 2px;}
+  .content{min-height:0;}
+  .panel{min-height:calc(100vh - 106px);}
+  .sg{grid-template-columns:1fr 1fr;}
+  .sg2{grid-template-columns:1fr;}
+  .pg{grid-template-columns:1fr;}
+  .fr{flex-wrap:wrap;}
+  .top{flex-wrap:wrap;height:auto;padding:6px 10px;gap:6px;}
+  .eng-sel{order:3;}
+  .topright{flex-wrap:wrap;gap:6px;}
+  .msgs{padding:8px 10px;}
+  .ia{padding:8px 10px;}
+  .ia-bar{flex-wrap:wrap;gap:4px;}
+}
+</style>
+</head>
+<body style="display:flex;flex-direction:column;">
+
+<div class="top">
+  <div class="logo">
+    <div class="hex">⬡</div>
+    <div>
+      <div class="logo-t">CIPHER SOVEREIGN</div>
+      <div class="logo-s">v2.0 · LOCAL INTELLIGENCE · COAI</div>
+    </div>
+  </div>
+  <div class="topright">
+    <div class="eng-sel">
+      <button class="eb active" id="eng-local" onclick="setEng('local')">LOCAL</button>
+      <button class="eb" id="eng-cloud" onclick="setEng('cloud')">CLOUD</button>
+      <button class="eb" id="eng-auto" onclick="setEng('auto')">AUTO</button>
+    </div>
+    <div class="sr"><div class="dot y" id="ldot"></div><span id="lstatus">CONNECTING...</span></div>
+    <button class="iabtn" onclick="checkLocal()">↺</button>
+    <div class="pill pill-red">PARTNER: JAY</div>
+    <div id="clock">--:--:--</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="sidebar">
+    <button class="nb active" onclick="nav('command',this)" title="Command"><span class="ni">⚡</span><span class="nl">CMD</span></button>
+    <button class="nb" onclick="nav('brief',this)" title="Brief"><span class="ni">📋</span><span class="nl">BRIEF</span></button>
+    <div class="sdiv"></div>
+    <button class="nb" onclick="nav('flags',this)" title="Flags"><span class="ni">🚨</span><span class="nl">FLAG</span></button>
+    <button class="nb" onclick="nav('actions',this)" title="Actions"><span class="ni">✅</span><span class="nl">ACT</span></button>
+    <div class="sdiv"></div>
+    <button class="nb" onclick="nav('clients',this)" title="Clients"><span class="ni">💼</span><span class="nl">CLT</span></button>
+    <button class="nb" onclick="nav('contacts',this)" title="Contacts"><span class="ni">👤</span><span class="nl">CRM</span></button>
+    <div class="sdiv"></div>
+    <button class="nb" onclick="nav('watch',this)" title="AI Watch" style="position:relative;">
+      <span class="ni">🛡</span><span class="nl">WATCH</span>
+      <span id="defconDot" style="position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:var(--green);"></span>
+    </button>
+    <button class="nb" onclick="nav('pets',this)" title="Pets"><span class="ni">🐾</span><span class="nl">PETS</span></button>
+    <button class="nb" onclick="nav('memory',this)" title="Memory"><span class="ni">🧠</span><span class="nl">MEM</span></button>
+    <div class="sdiv"></div>
+    <button class="nb" onclick="nav('settings',this)" title="Settings"><span class="ni">⚙</span><span class="nl">SET</span></button>
+  </div>
+
+  <div class="content">
+
+    <!-- COMMAND -->
+    <div class="panel active" id="panel-command">
+      <div class="ph">
+        <div class="pt">COMMAND</div>
+        <div class="ps">CIPHER AI · DIRECT CHANNEL · <span id="engDisplay" style="color:var(--gold);">CONNECTING...</span></div>
+      </div>
+      <div class="cw">
+        <div class="msgs" id="chatMsgs">
+          <div class="msg msg-c">
+            <div class="mh">⬡ CIPHER-SOVEREIGN · v2.0</div>
+            <div class="mb"><strong>Cipher-Sovereign online.</strong> Structural integrity confirmed.<br><br>Running on <em id="modelDisplay">detecting engine...</em>. Memory synchronized. Elara 3 Protocol active.<br><br>What's the mission, Jay?</div>
+          </div>
+        </div>
+        <div class="typing-row" id="typingRow">
+          <div class="td"></div><div class="td"></div><div class="td"></div>
+          <span style="margin-left:6px;font-size:10px;color:var(--text2);" id="typingStatus">PROCESSING...</span>
+        </div>
+        <div class="ia">
+          <span class="ipfx">JAY&gt;</span>
+          <textarea class="ci" id="chatIn" placeholder="Type or press 🎤 to speak..." rows="1"></textarea>
+          <button class="vbtn" id="micBtn" onclick="toggleMic()" title="Push to talk">🎤</button>
+          <button class="vbtn" id="spkBtn" onclick="toggleSpeak()" title="Toggle voice output">🔇</button>
+          <button class="sb" id="sendBtn" onclick="sendMsg()">➤</button>
+        </div>
+        <div class="ia-bar">
+          <span id="vstatus">VOICE READY · CHROME REQUIRED</span>
+          <button class="iabtn" id="contBtn" onclick="toggleCont()">CONTINUOUS: OFF</button>
+          <button class="iabtn" onclick="newChat()">+ NEW CHAT</button>
+          <button class="iabtn" onclick="exportChat()">↓ EXPORT</button>
+          <button class="iabtn" onclick="selfRepair()">⚙ SELF-REPAIR</button>
+          <button class="iabtn" onclick="nav('watch',document.querySelectorAll('.nb')[6])">🛡 WATCH</button>
+          <button class="iabtn" onclick="nav('brief',document.querySelectorAll('.nb')[1])">📋 BRIEF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BRIEF -->
+    <div class="panel" id="panel-brief">
+      <div class="ph"><div class="pt">DAILY BRIEF</div><div class="ps">INTELLIGENCE REPORT · AI GENERATED</div></div>
+      <div class="pb">
+        <button class="gbtn" id="briefBtn" onclick="genBrief()">▶ GENERATE DAILY BRIEF</button>
+        <div id="briefOut"></div>
+      </div>
+    </div>
+
+    <!-- FLAGS -->
+    <div class="panel" id="panel-flags">
+      <div class="ph"><div class="pt">ACTIVE FLAGS</div><div class="ps">ALERTS · SOVEREIGNTY WATCHDOG</div></div>
+      <div class="pb">
+        <div class="fr">
+          <input class="fi" id="fT" placeholder="Flag title...">
+          <select class="fsel" id="fTy"><option>URGENT</option><option>SOVEREIGNTY</option><option>FINANCE</option><option>BUSINESS</option><option>RELATIONSHIP</option><option>HEALTH</option></select>
+          <select class="fsel" id="fU"><option value="IMMEDIATE">IMMEDIATE</option><option value="THIS_WEEK">THIS WEEK</option><option value="THIS_MONTH">THIS MONTH</option></select>
+          <input class="fi" id="fI" placeholder="Issue..." style="flex:2;">
+          <button class="addb" onclick="addFlag()">+ FLAG</button>
+        </div>
+        <div id="flagsOut"><div class="empty">LOADING...</div></div>
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="panel" id="panel-actions">
+      <div class="ph"><div class="pt">ACTION ITEMS</div><div class="ps">TACTICAL QUEUE · PRIORITY MATRIX</div></div>
+      <div class="pb">
+        <div class="fr">
+          <input class="fi" id="aT" placeholder="Action item..." style="flex:2;">
+          <select class="fsel" id="aP"><option>CRITICAL</option><option>HIGH</option><option selected>MEDIUM</option><option>LOW</option></select>
+          <input class="fi" id="aD" type="date" style="max-width:150px;">
+          <button class="addb" onclick="addAction()">+ ADD</button>
+        </div>
+        <div id="actOut"><div class="empty">LOADING...</div></div>
+      </div>
+    </div>
+
+    <!-- CLIENTS -->
+    <div class="panel" id="panel-clients">
+      <div class="ph"><div class="pt">CLIENT PIPELINE</div><div class="ps">REVENUE · CONTRACTS · MILESTONES</div></div>
+      <div class="pb">
+        <div class="sg">
+          <div class="sc"><span class="sv" id="s0">—</span><span class="sl">ACTIVE</span></div>
+          <div class="sc"><span class="sv" id="s1">—</span><span class="sl">CONTRACT</span></div>
+          <div class="sc"><span class="sv" id="s2">—</span><span class="sl">COLLECTED</span></div>
+          <div class="sc"><span class="sv" id="s3">—</span><span class="sl">OUTSTANDING</span></div>
+        </div>
+        <div class="fr">
+          <input class="fi" id="cN" placeholder="Client name...">
+          <input class="fi" id="cC" placeholder="Company...">
+          <input class="fi" id="cV" placeholder="Contract $" type="number" style="max-width:130px;">
+          <input class="fi" id="cE" placeholder="Email...">
+          <input class="fi" id="cP" placeholder="Phone...">
+          <button class="addb" onclick="addClient()">+ CLIENT</button>
+        </div>
+        <div id="cliOut"><div class="empty">LOADING...</div></div>
+      </div>
+    </div>
+
+    <!-- CONTACTS -->
+    <div class="panel" id="panel-contacts">
+      <div class="ph"><div class="pt">RELATIONSHIP CRM</div><div class="ps">CONTACT GRAPH · CADENCE TRACKING</div></div>
+      <div class="pb">
+        <div class="fr">
+          <input class="fi" id="coN" placeholder="Full name...">
+          <select class="fsel" id="coCa"><option>FAMILY</option><option>FRIEND</option><option>CLIENT</option><option>VENDOR</option><option>PARTNER</option></select>
+          <input class="fi" id="coPh" placeholder="Phone...">
+          <input class="fi" id="coEm" placeholder="Email...">
+          <input class="fi" id="coCd" placeholder="Cadence days" type="number" value="14" style="max-width:110px;">
+          <button class="addb" onclick="addContact()">+ CONTACT</button>
+        </div>
+        <div id="conOut"><div class="empty">LOADING...</div></div>
+      </div>
+    </div>
+
+    <!-- AI WATCH -->
+    <div class="panel" id="panel-watch">
+      <div class="ph">
+        <div class="pt">AI WATCH</div>
+        <div class="ps">DEFCON · THREAT MATRIX · ELARA 3 PROTOCOL</div>
+        <div class="ph-r">
+          <button class="iabtn" onclick="runScan()" style="border-color:var(--red2);color:var(--red2);">⟳ LIVE SCAN</button>
+        </div>
+      </div>
+      <div class="pb">
+        <div id="defconBlock" style="background:var(--navy3);border:2px solid var(--green);border-radius:3px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:14px;">
+          <div style="text-align:center;flex-shrink:0;">
+            <div id="defconNum" style="font-family:var(--display);font-size:40px;font-weight:900;color:var(--green);line-height:1;">5</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:2px;">DEFCON</div>
+          </div>
+          <div style="flex:1;">
+            <div id="defconLabel" style="font-family:var(--display);font-size:11px;font-weight:700;color:var(--green);letter-spacing:2px;">GREEN — NORMAL OPERATIONS</div>
+            <div id="defconReason" style="font-family:var(--mono);font-size:10px;color:var(--text2);margin-top:4px;"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <button class="bx p" onclick="escalate()">▲ ESCALATE</button>
+            <button class="bx" onclick="deescalate()">▼ STAND DOWN</button>
+          </div>
+        </div>
+        <div class="fr">
+          <input class="fi" id="wtT" placeholder="Threat title..." style="flex:2;">
+          <select class="fsel" id="wtL"><option value="GREEN">GREEN</option><option value="YELLOW" selected>YELLOW</option><option value="ORANGE">ORANGE</option><option value="RED">RED</option><option value="BLACK">BLACK</option></select>
+          <select class="fsel" id="wtC"><option value="MISALIGNMENT">MISALIGNMENT</option><option value="CAPABILITY_JUMP">CAPABILITY JUMP</option><option value="COMPANY_RACE">COMPANY RACE</option><option value="GEOPOLITICAL">GEOPOLITICAL</option><option value="INFRASTRUCTURE">INFRASTRUCTURE</option><option value="SOVEREIGNTY">SOVEREIGNTY</option></select>
+          <input class="fi" id="wtD" placeholder="Description..." style="flex:2;">
+          <button class="addb" onclick="addThreat()">+ LOG</button>
+        </div>
+        <div class="slbl">ACTIVE THREAT INTELLIGENCE</div>
+        <div id="threatsOut"><div class="empty">LOADING THREAT MATRIX...</div></div>
+        <div id="scanOut" style="display:none;margin-top:14px;">
+          <div class="slbl">LIVE SCAN</div>
+          <div class="bblock"><div class="bbody" id="scanBody">...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PETS -->
+    <div class="panel" id="panel-pets">
+      <div class="ph"><div class="pt">PET HEALTH RECORDS</div><div class="ps">MILO · LULA · REMY</div></div>
+      <div class="pb"><div id="petsOut"><div class="empty">LOADING...</div></div></div>
+    </div>
+
+    <!-- MEMORY -->
+    <div class="panel" id="panel-memory">
+      <div class="ph"><div class="pt">MEMORY STORE</div><div class="ps">PERSISTENT INTELLIGENCE · DECISION LOG</div></div>
+      <div class="pb">
+        <div class="fr">
+          <input class="fi" id="mSrch" placeholder="Search memories..." style="flex:2;" onkeydown="if(event.key==='Enter')searchMem()">
+          <button class="addb" onclick="searchMem()">SEARCH</button>
+        </div>
+        <div class="fr">
+          <input class="fi" id="mC" placeholder="Log memory or observation..." style="flex:3;">
+          <select class="fsel" id="mCat"><option value="business">BUSINESS</option><option value="decision">DECISION</option><option value="finance">FINANCE</option><option value="life">LIFE</option><option value="health">HEALTH</option><option value="relationship">RELATIONSHIP</option><option value="flag">FLAG</option></select>
+          <button class="addb" onclick="addMem()">+ LOG</button>
+        </div>
+        <div id="memOut"><div class="empty">LOADING...</div></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="panel" id="panel-settings">
+      <div class="ph"><div class="pt">SETTINGS</div><div class="ps">CONFIGURE CIPHER · LOCAL SOVEREIGN STACK</div></div>
+      <div class="pb">
+        <div class="slbl">CONNECTION</div>
+        <div class="sg2">
+          <div class="srow"><span class="slbl2">OLLAMA URL</span><input class="sval" id="set-ollama" placeholder="http://localhost:11434"></div>
+          <div class="srow"><span class="slbl2">SERVER PORT</span><input class="sval" id="set-port" placeholder="3131"></div>
+        </div>
+        <div class="slbl">MODELS</div>
+        <div class="sg2">
+          <div class="srow"><span class="slbl2">ACTIVE MODEL</span><input class="sval" id="set-model" placeholder="auto — best available"></div>
+          <div class="srow"><span class="slbl2">ANTHROPIC MODEL</span><input class="sval" id="set-cloud-model" placeholder="claude-sonnet-4-6"></div>
+        </div>
+        <div class="slbl">API KEYS</div>
+        <div class="sg2">
+          <div class="srow"><span class="slbl2">ANTHROPIC API KEY</span><input class="sval" id="set-anth-key" type="password" placeholder="sk-ant-..."></div>
+          <div class="srow"><span class="slbl2">CIPHER API KEY</span><input class="sval" id="set-cipher-key" type="password" placeholder="leave blank = open local mode"></div>
+        </div>
+        <div class="slbl">MEMORY</div>
+        <div class="sg2">
+          <div class="srow"><span class="slbl2">EMBED MODEL</span><input class="sval" id="set-embed" placeholder="nomic-embed-text"></div>
+          <div class="srow"><span class="slbl2">RATE LIMIT (req/min)</span><input class="sval" id="set-rate" type="number" placeholder="30"></div>
+        </div>
+        <button class="ssave" onclick="saveSettings()">SAVE & APPLY</button>
+        <div id="setStatus" style="margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--text2);"></div>
+        <div class="slbl" style="margin-top:18px;">SYSTEM INFO</div>
+        <div id="sysInfo" style="font-family:var(--mono);font-size:10px;color:var(--text2);line-height:2;"></div>
+        <div class="slbl" style="margin-top:18px;">EXPORT CONVERSATION</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="bx" onclick="exportChat('json')">↓ JSON</button>
+          <button class="bx" onclick="exportChat('md')">↓ MARKDOWN</button>
+          <button class="bx" onclick="exportChat('txt')">↓ TEXT</button>
+        </div>
+        <div class="slbl" style="margin-top:18px;">QUICK ACTIONS</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="bx p" onclick="upgradeModels()">▲ UPGRADE MODELS</button>
+          <button class="bx" onclick="selfRepair()">⚙ SELF-REPAIR</button>
+          <button class="bx" onclick="checkLocal()">↺ RECONNECT</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+'use strict';
+// ============================================================
+// CONFIG
+// ============================================================
+var LOCAL = 'http://localhost:3131';
+var SB = 'https://expcinwdxxlfgkuxpirq.supabase.co';
+var SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4cGNpbndkeHhsZmdrdXhwaXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODc2MDUsImV4cCI6MjA5MzI2MzYwNX0.O3N5yhqVwhsmgzuBiJyTS2s7BeAtV7gDYhee0my7C6M';
+var CIPHER_API_KEY = localStorage.getItem('cipher_api_key') || '';
+var engine = 'auto';
+var history = [];
+var localOnline = false;
+var activeModel = null;
+var autoSpeak = false;
+var continuousMode = false;
+var isListening = false;
+var recognition = null;
+var DEFCON_LEVEL = 5;
+
+// ============================================================
+// PERSIST UI STATE
+// ============================================================
+function savePrefs() {
+  localStorage.setItem('cipher_engine', engine);
+  localStorage.setItem('cipher_autoSpeak', autoSpeak ? '1' : '0');
+  localStorage.setItem('cipher_continuous', continuousMode ? '1' : '0');
+}
+
+function loadPrefs() {
+  var savedEngine = localStorage.getItem('cipher_engine');
+  if (savedEngine && ['local','cloud','auto'].includes(savedEngine)) {
+    engine = savedEngine;
+    document.querySelectorAll('.eb').forEach(function(b) { b.classList.remove('active'); });
+    var btn = document.getElementById('eng-' + engine);
+    if (btn) btn.classList.add('active');
+  }
+  if (localStorage.getItem('cipher_autoSpeak') === '1') {
+    autoSpeak = true;
+    document.getElementById('spkBtn').textContent = '🔊';
+    document.getElementById('spkBtn').style.borderColor = 'var(--green)';
+  }
+}
+
+// ============================================================
+// CLOCK + INIT
+// ============================================================
+setInterval(function() {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US', {hour12: false});
+}, 1000);
+
+window.addEventListener('load', function() {
+  // Apply any saved server settings before first connection
+  var savedPort = localStorage.getItem('cipher_port');
+  if (savedPort) LOCAL = 'http://localhost:' + savedPort;
+  var savedKey = localStorage.getItem('cipher_api_key');
+  if (savedKey) CIPHER_API_KEY = savedKey;
+  loadPrefs();
+  checkLocal();
+  var retryTimer = setInterval(function() {
+    if (!localOnline) {
+      checkLocal();
+    } else {
+      clearInterval(retryTimer);
+      loadSession();
+    }
+  }, 1000);
+  setTimeout(loadFlags, 500);
+  setTimeout(loadDefcon, 2000);
+});
+
+// ============================================================
+// AUTH HELPER — attaches X-API-Key if configured
+// ============================================================
+function cipherFetch(url, opts) {
+  opts = opts || {};
+  opts.headers = opts.headers || {};
+  if (CIPHER_API_KEY) opts.headers['X-API-Key'] = CIPHER_API_KEY;
+  return fetch(url, opts);
+}
+
+// ============================================================
+// SERVER CONNECTION
+// ============================================================
+function checkLocal() {
+  var ctrl = new AbortController();
+  var t = setTimeout(function() { ctrl.abort(); }, 5000);
+  cipherFetch(LOCAL + '/status', {signal: ctrl.signal})
+    .then(function(r) { clearTimeout(t); return r.json(); })
+    .then(function(d) {
+      localOnline = true;
+      activeModel = d.active_model || null;
+      var dot = document.getElementById('ldot');
+      var stat = document.getElementById('lstatus');
+      if (d.ollama_online && activeModel) {
+        dot.className = 'dot g';
+        var ml = activeModel.split(':')[0].toUpperCase();
+        var semTag = d.semantic_memory ? ' · 🧠 RAG' : '';
+        stat.textContent = ml + ' LOCAL' + semTag;
+        document.getElementById('engDisplay').textContent = 'LOCAL · ' + activeModel + (d.semantic_memory ? ' · SEMANTIC MEM' : '');
+        document.getElementById('modelDisplay').textContent = activeModel;
+      } else {
+        dot.className = 'dot y';
+        stat.textContent = 'SERVER UP · LOADING';
+        document.getElementById('engDisplay').textContent = 'SERVER ONLINE';
+        document.getElementById('modelDisplay').textContent = 'model loading...';
+      }
+    })
+    .catch(function() {
+      clearTimeout(t);
+      localOnline = false;
+      document.getElementById('ldot').className = 'dot r';
+      document.getElementById('lstatus').textContent = 'OFFLINE';
+      document.getElementById('engDisplay').textContent = 'SERVER NOT RUNNING';
+      document.getElementById('modelDisplay').textContent = 'python cipher_server.py';
+    });
+}
+
+// ============================================================
+// ENGINE SELECTOR
+// ============================================================
+function setEng(e) {
+  engine = e;
+  document.querySelectorAll('.eb').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('eng-' + e).classList.add('active');
+  savePrefs();
+}
+
+// ============================================================
+// NAV
+// ============================================================
+function nav(name, btn) {
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.nb').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('panel-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  var loaders = {
+    flags: loadFlags, actions: loadActions, clients: loadClients,
+    contacts: loadContacts, pets: loadPets, memory: loadMem,
+    watch: loadWatch
+  };
+  if (loaders[name]) loaders[name]();
+}
+
+// ============================================================
+// SUPABASE
+// ============================================================
+function sbGet(table, params) {
+  params = params || '';
+  return fetch(SB + '/rest/v1/' + table + '?' + params, {
+    headers: {'apikey': SK, 'Authorization': 'Bearer ' + SK}
+  }).then(function(r) { return r.json(); });
+}
+
+function sbPost(table, data) {
+  return fetch(SB + '/rest/v1/' + table, {
+    method: 'POST',
+    headers: {'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': 'application/json', 'Prefer': 'return=representation'},
+    body: JSON.stringify(data)
+  }).then(function(r) { return r.json(); });
+}
+
+function sbPatch(table, id, data) {
+  return fetch(SB + '/rest/v1/' + table + '?id=eq.' + id, {
+    method: 'PATCH',
+    headers: {'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  });
+}
+
+// ============================================================
+// TEXT FORMAT
+// ============================================================
+function fmt(t) {
+  return String(t)
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/^### (.+)$/gm, '<strong style="color:white;font-size:15px;">$1</strong>')
+    .replace(/^## (.+)$/gm, '<strong style="color:white;font-size:15px;">$1</strong>')
+    .replace(/^# (.+)$/gm, '<strong style="color:white;font-size:15px;">$1</strong>')
+    .replace(/\n/g, '<br>');
+}
+
+// ============================================================
+// CHAT
+// ============================================================
+function scrollMsgs() {
+  var c = document.getElementById('chatMsgs');
+  c.scrollTop = c.scrollHeight;
+}
+
+function appendMsg(role, text, tools, eng) {
+  var c = document.getElementById('chatMsgs');
+  var d = document.createElement('div');
+  d.className = 'msg msg-' + (role === 'user' ? 'u' : 'c');
+  var toolsHtml = '';
+  if (tools && tools.length) {
+    tools.forEach(function(t) {
+      toolsHtml += '<span style="font-family:var(--mono);font-size:9px;background:rgba(30,96,145,.2);border:1px solid rgba(30,96,145,.3);color:var(--blue2);padding:1px 5px;border-radius:2px;margin-left:4px;">'+t+'</span>';
+    });
+  }
+  var engLabel = eng ? '<span style="color:var(--text2);font-size:8px;">[' + eng + ']</span>' : '';
+  var hdr = role === 'user' ? '&#128100; JAY &middot; PARTNER' : '&#9649; CIPHER-SOVEREIGN &middot; INTEL';
+  var body = role === 'user' ? text.replace(/\n/g, '<br>') : fmt(text);
+  d.innerHTML = '<div class="mh">' + hdr + ' ' + engLabel + toolsHtml + '</div><div class="mb">' + body + '</div>';
+  c.appendChild(d);
+  scrollMsgs();
+  if (role === 'cipher' && autoSpeak) speakText(text);
+}
+
+// ============================================================
+// SESSION LOAD
+// ============================================================
+var currentSessionId = null;
+
+async function loadSession() {
+  if (!localOnline) return;
+  try {
+    var d = await cipherFetch(LOCAL +'/session/current').then(function(r) { return r.json(); });
+    currentSessionId = d.session_id || null;
+    var msgs = d.messages || [];
+    if (!msgs.length) return;
+    // Replay stored messages into UI (skip the boot welcome)
+    var c = document.getElementById('chatMsgs');
+    // Remove welcome message
+    var welcome = c.querySelector('.msg-c');
+    if (welcome) c.removeChild(welcome);
+    msgs.forEach(function(m) {
+      var role = m.role === 'user' ? 'user' : 'cipher';
+      appendMsg(role, m.content, m.tools_used || [], m.engine || '');
+      history.push({role: m.role === 'user' ? 'user' : 'assistant', content: m.content});
+    });
+    scrollMsgs();
+  } catch(e) {}
+}
+
+async function newChat() {
+  if (!localOnline) return;
+  history = [];
+  currentSessionId = null;
+  var c = document.getElementById('chatMsgs');
+  c.innerHTML = '<div class="msg msg-c"><div class="mh">⬡ CIPHER-SOVEREIGN · v2.0</div><div class="mb"><strong>New session started.</strong> Previous conversation archived. What\'s the mission, Jay?</div></div>';
+  try {
+    var d = await cipherFetch(LOCAL +'/session/new', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{}'}).then(function(r) { return r.json(); });
+    currentSessionId = d.session_id || null;
+  } catch(e) {}
+}
+
+// ============================================================
+// CHAT — STREAMING
+// ============================================================
+async function sendMsg() {
+  var inp = document.getElementById('chatIn');
+  var msg = inp.value.trim();
+  if (!msg) return;
+  inp.value = '';
+  inp.style.height = 'auto';
+  document.getElementById('sendBtn').disabled = true;
+  appendMsg('user', msg, [], '');
+  history.push({role: 'user', content: msg});
+
+  if (!localOnline) {
+    appendMsg('cipher', '**LOCAL SERVER OFFLINE.**\n\nRun in PowerShell:\n`cd C:\\Users\\blunt\\Cipher`\n`python cipher_server.py`\n\nThen open: `http://localhost:3131`', [], 'offline');
+    document.getElementById('sendBtn').disabled = false;
+    return;
+  }
+
+  document.getElementById('typingRow').style.display = 'flex';
+  var ml = activeModel ? activeModel.split(':')[0].toUpperCase() : 'LOCAL';
+  document.getElementById('typingStatus').textContent = ml + ' THINKING...';
+  scrollMsgs();
+
+  // Create the cipher reply bubble now so tokens stream into it
+  var c = document.getElementById('chatMsgs');
+  var bubble = document.createElement('div');
+  bubble.className = 'msg msg-c';
+  bubble.innerHTML = '<div class="mh">&#9649; CIPHER-SOVEREIGN &middot; INTEL</div><div class="mb" id="streamBubble"></div>';
+  c.appendChild(bubble);
+  var streamEl = document.getElementById('streamBubble');
+  var fullText = '';
+
+  try {
+    var resp = await cipherFetch(LOCAL +'/chat/stream', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({messages: history, model: engine, tools: [], stream: true})
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+
+    var reader = resp.body.getReader();
+    var decoder = new TextDecoder();
+    var buf = '';
+
+    while (true) {
+      var _ref = await reader.read();
+      var done = _ref.done, value = _ref.value;
+      if (done) break;
+      buf += decoder.decode(value, {stream: true});
+      var lines = buf.split('\n');
+      buf = lines.pop(); // keep incomplete line
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i].trim();
+        if (!line.startsWith('data: ')) continue;
+        try {
+          var ev = JSON.parse(line.slice(6));
+          if (ev.token) {
+            fullText += ev.token;
+            streamEl.innerHTML = fmt(fullText);
+            scrollMsgs();
+          }
+          if (ev.done) {
+            document.getElementById('typingRow').style.display = 'none';
+            // Update header with engine + tools
+            var tools = ev.tools_used || [];
+            var engLabel = ev.engine || engine;
+            var toolsHtml = tools.map(function(t) {
+              return '<span style="font-family:var(--mono);font-size:9px;background:rgba(30,96,145,.2);border:1px solid rgba(30,96,145,.3);color:var(--blue2);padding:1px 5px;border-radius:2px;margin-left:4px;">'+t+'</span>';
+            }).join('');
+            bubble.querySelector('.mh').innerHTML = '&#9649; CIPHER-SOVEREIGN &middot; INTEL <span style="color:var(--text2);font-size:8px;">[' + engLabel + ']</span>' + toolsHtml;
+            history.push({role: 'assistant', content: fullText});
+            if (autoSpeak) speakText(fullText);
+          }
+          if (ev.error) {
+            streamEl.innerHTML = '<span style="color:var(--red2);">ERROR: ' + ev.error + '</span>';
+            document.getElementById('typingRow').style.display = 'none';
+          }
+        } catch(parseErr) {}
+      }
+    }
+  } catch(e) {
+    document.getElementById('typingRow').style.display = 'none';
+    streamEl.innerHTML = '<span style="color:var(--red2);">SERVER ERROR: ' + e.message + ' — check cipher_server.py is running.</span>';
+    localOnline = false;
+    document.getElementById('ldot').className = 'dot r';
+  }
+
+  document.getElementById('sendBtn').disabled = false;
+  scrollMsgs();
+}
+
+document.getElementById('chatIn').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+});
+document.getElementById('chatIn').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+
+// ============================================================
+// VOICE
+// ============================================================
+function initRecog() {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { document.getElementById('vstatus').textContent = 'VOICE: CHROME ONLY'; return false; }
+  recognition = new SR();
+  recognition.lang = 'en-US';
+  recognition.interimResults = true;
+  recognition.continuous = false;
+  recognition.onstart = function() {
+    isListening = true;
+    document.getElementById('micBtn').classList.add('listening');
+    document.getElementById('micBtn').textContent = '🔴';
+    document.getElementById('vstatus').textContent = 'LISTENING...';
+  };
+  recognition.onresult = function(e) {
+    var t = Array.from(e.results).map(function(r) { return r[0].transcript; }).join('');
+    document.getElementById('chatIn').value = t;
+  };
+  recognition.onend = function() {
+    isListening = false;
+    document.getElementById('micBtn').classList.remove('listening');
+    document.getElementById('micBtn').textContent = '🎤';
+    document.getElementById('vstatus').textContent = 'VOICE READY';
+    var t = document.getElementById('chatIn').value.trim();
+    if (t) sendMsg();
+  };
+  recognition.onerror = function(e) {
+    isListening = false;
+    document.getElementById('micBtn').classList.remove('listening');
+    document.getElementById('micBtn').textContent = '🎤';
+    document.getElementById('vstatus').textContent = 'MIC ERROR: ' + e.error;
+  };
+  return true;
+}
+
+function toggleMic() {
+  if (!recognition && !initRecog()) return;
+  if (isListening) { recognition.stop(); }
+  else { window.speechSynthesis.cancel(); recognition.start(); }
+}
+
+function toggleSpeak() {
+  autoSpeak = !autoSpeak;
+  var b = document.getElementById('spkBtn');
+  b.textContent = autoSpeak ? '🔊' : '🔇';
+  b.style.borderColor = autoSpeak ? 'var(--green)' : '';
+  document.getElementById('vstatus').textContent = autoSpeak ? 'AUTO-SPEAK ON' : 'AUTO-SPEAK OFF';
+  savePrefs();
+}
+
+function toggleCont() {
+  continuousMode = !continuousMode;
+  var b = document.getElementById('contBtn');
+  b.textContent = 'CONTINUOUS: ' + (continuousMode ? 'ON' : 'OFF');
+  b.className = 'iabtn' + (continuousMode ? ' on' : '');
+  savePrefs();
+  if (continuousMode && !isListening) toggleMic();
+}
+
+function speakText(text) {
+  window.speechSynthesis.cancel();
+  var clean = text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1').replace(/`([^`]+)`/g, '$1').replace(/#+\s/g, '').replace(/<[^>]+>/g, ' ').substring(0, 800);
+  var u = new SpeechSynthesisUtterance(clean);
+  u.rate = 1.05; u.pitch = 1.0; u.volume = 1.0;
+  var voices = window.speechSynthesis.getVoices();
+  var v = voices.find(function(x) { return x.name.includes('Aria') || x.name.includes('Samantha') || (x.lang === 'en-US' && x.localService); }) || voices.find(function(x) { return x.lang.startsWith('en'); });
+  if (v) u.voice = v;
+  u.onend = function() {
+    document.getElementById('spkBtn').classList.remove('speaking');
+    document.getElementById('vstatus').textContent = 'VOICE READY';
+    if (continuousMode && !isListening) setTimeout(toggleMic, 600);
+  };
+  document.getElementById('spkBtn').classList.add('speaking');
+  document.getElementById('vstatus').textContent = 'CIPHER SPEAKING...';
+  window.speechSynthesis.speak(u);
+}
+if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = function() { window.speechSynthesis.getVoices(); };
+
+// ============================================================
+// SELF REPAIR
+// ============================================================
+function selfRepair() {
+  if (!localOnline) { appendMsg('cipher', '**SERVER OFFLINE.** Start cipher_server.py first.', [], ''); return; }
+  cipherFetch(LOCAL +'/self-repair', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{"run_upgrade":false}'})
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      var checks = d.checks.map(function(c) { return (c.status === 'OK' ? '✓' : '✗') + ' ' + c.name + (c.value ? ' · ' + c.value : ''); }).join('\n');
+      var repairs = d.repairs.length ? '\n\n**REPAIRS:**\n' + d.repairs.map(function(r) { return '→ ' + r; }).join('\n') : '';
+      appendMsg('cipher', '**SELF-REPAIR: ' + d.status + '**\n\n' + checks + repairs, [], 'self-repair');
+      scrollMsgs();
+    })
+    .catch(function(e) { appendMsg('cipher', '**REPAIR ERROR:** ' + e.message, [], ''); });
+}
+
+// ============================================================
+// DAILY BRIEF
+// ============================================================
+async function genBrief() {
+  var btn = document.getElementById('briefBtn');
+  btn.disabled = true; btn.textContent = '⟳ GENERATING...';
+  document.getElementById('briefOut').innerHTML = '<div class="empty">CIPHER COMPILING BRIEF...</div>';
+  if (!localOnline) {
+    document.getElementById('briefOut').innerHTML = '<div class="empty">SERVER OFFLINE — start cipher_server.py</div>';
+    btn.disabled = false; btn.textContent = '▶ GENERATE DAILY BRIEF'; return;
+  }
+  try {
+    var bData = await cipherFetch(LOCAL +'/brief').then(function(r) { return r.json(); });
+    var prompt = 'Generate Cipher daily brief for Jay.\nDate: ' + new Date().toDateString() + '\nFlags: ' + JSON.stringify(bData.flags && bData.flags.items || []) + '\nActions: ' + JSON.stringify(bData.actions && bData.actions.items || []) + '\nClients: ' + JSON.stringify(bData.clients && bData.clients.items || []) + '\n\nFormat:\n BRIEF — ' + new Date().toDateString().toUpperCase() + '\n\n**OPERATIONAL STATUS:** [2 sentences]\n\n**PRIORITY QUEUE:**\n[Top 3 urgent items]\n\n**ACTIVE FLAGS:**\n[From data]\n\n**CLIENT WATCH:**\n[From clients]\n\n**SOVEREIGNTY WATCH:**\n[Any rented-infra risks]\n\n**ACTION SUMMARY:**\n[3 next steps for today]';
+    var r = await cipherFetch(LOCAL +'/chat', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({messages: [{role: 'user', content: prompt}], model: engine, tools: []})});
+    var d = await r.json();
+    document.getElementById('briefOut').innerHTML = '<div class="bblock"><div class="btitle">CIPHER INTELLIGENCE BRIEF</div><div class="bbody">' + fmt(d.response || 'Error') + '</div></div><div class="bblock" style="opacity:.5;"><div class="btitle">META</div><div style="font-family:var(--mono);font-size:10px;color:var(--text2);">Generated: ' + new Date().toLocaleString() + ' · ' + (d.engine || engine) + '</div></div>';
+  } catch(e) {
+    document.getElementById('briefOut').innerHTML = '<div class="empty">FAILED: ' + e.message + '</div>';
+  }
+  btn.disabled = false; btn.textContent = '▶ GENERATE DAILY BRIEF';
+}
+
+// ============================================================
+// FLAGS
+// ============================================================
+function loadFlags() {
+  sbGet('cipher_active_flags', 'is_resolved=eq.false&order=created_at.desc').then(function(d) {
+    var el = document.getElementById('flagsOut');
+    if (!Array.isArray(d) || !d.length) { el.innerHTML = '<div class="empty">NO ACTIVE FLAGS — SYSTEM CLEAR</div>'; return; }
+    var uc = {IMMEDIATE: 'br', THIS_WEEK: 'bgo', THIS_MONTH: 'bb'};
+    el.innerHTML = d.map(function(f) {
+      return '<div class="card fl-' + f.urgency + '"><div class="ch"><span class="ct">' + f.title + '</span><div class="brow"><span class="b ' + (uc[f.urgency] || 'bgr') + '">' + f.urgency.replace('_', ' ') + '</span><span class="b bgr">' + f.flag_type + '</span></div></div><div class="cm">' + f.issue + '</div><div class="ca"><button class="rbtn" onclick="resolveFlag(\'' + f.id + '\')">✓ RESOLVE</button><span class="bx">' + new Date(f.created_at).toLocaleDateString() + '</span></div></div>';
+    }).join('');
+  });
+}
+function addFlag() {
+  var t = document.getElementById('fT').value.trim(), i = document.getElementById('fI').value.trim();
+  if (!t || !i) return;
+  sbPost('cipher_active_flags', {title: t, issue: i, flag_type: document.getElementById('fTy').value, urgency: document.getElementById('fU').value}).then(loadFlags);
+  document.getElementById('fT').value = ''; document.getElementById('fI').value = '';
+}
+function resolveFlag(id) { sbPatch('cipher_active_flags', id, {is_resolved: true, resolved_at: new Date().toISOString()}).then(loadFlags); }
+
+// ============================================================
+// ACTIONS
+// ============================================================
+function loadActions() {
+  sbGet('cipher_action_items', 'status=in.(OPEN,IN_PROGRESS)&order=created_at.desc').then(function(d) {
+    var el = document.getElementById('actOut');
+    if (!Array.isArray(d) || !d.length) { el.innerHTML = '<div class="empty">ACTION QUEUE CLEAR</div>'; return; }
+    var pc = {CRITICAL: 'br', HIGH: 'bgo', MEDIUM: 'bb', LOW: 'bgr'};
+    el.innerHTML = d.map(function(a) {
+      return '<div class="card"><div class="ch"><span class="ct">' + a.title + '</span><div class="brow"><span class="b ' + (pc[a.priority] || 'bgr') + '">' + a.priority + '</span></div></div>' + (a.description ? '<div class="cm">' + a.description + '</div>' : '') + '<div class="ca"><button class="rbtn" onclick="doneAct(\'' + a.id + '\')">✓ DONE</button>' + (a.due_date ? '<span class="bx">DUE: ' + a.due_date + '</span>' : '') + '</div></div>';
+    }).join('');
+  });
+}
+function addAction() {
+  var t = document.getElementById('aT').value.trim(); if (!t) return;
+  sbPost('cipher_action_items', {title: t, priority: document.getElementById('aP').value, due_date: document.getElementById('aD').value || null, source_agent: 'manual'}).then(loadActions);
+  document.getElementById('aT').value = '';
+}
+function doneAct(id) { sbPatch('cipher_action_items', id, {status: 'DONE'}).then(loadActions); }
+
+// ============================================================
+// CLIENTS
+// ============================================================
+function loadClients() {
+  sbGet('cipher_clients', 'order=created_at.desc').then(function(d) {
+    var cnt = 0, con = 0, col = 0, out = 0;
+    (d || []).forEach(function(x) {
+      if (x.status === 'ACTIVE') cnt++;
+      con += parseFloat(x.contract_value || 0);
+      col += parseFloat(x.revenue_collected || 0);
+      out += parseFloat(x.outstanding_balance || 0);
+    });
+    document.getElementById('s0').textContent = cnt;
+    document.getElementById('s1').textContent = '$' + con.toLocaleString();
+    document.getElementById('s2').textContent = '$' + col.toLocaleString();
+    document.getElementById('s3').textContent = '$' + out.toLocaleString();
+    var sc = {ACTIVE: 'bg', PAUSED: 'bgo', COMPLETED: 'bb', CHURNED: 'bgr'};
+    document.getElementById('cliOut').innerHTML = (d || []).map(function(x) {
+      var co = x.company && x.company !== x.name ? ' <span style="font-weight:400;color:var(--text2);">· ' + x.company + '</span>' : '';
+      return '<div class="card"><div class="ch"><span class="ct">' + x.name + co + '</span><span class="b ' + (sc[x.status] || 'bgr') + '">' + x.status + '</span></div><div class="cm">' + (x.contract_value ? 'CONTRACT: <span>$' + parseFloat(x.contract_value).toLocaleString() + '</span> · ' : '') + (x.notes || '') + '</div></div>';
+    }).join('');
+  });
+}
+function addClient() {
+  var n = document.getElementById('cN').value.trim(); if (!n) return;
+  sbPost('cipher_clients', {name: n, company: document.getElementById('cC').value.trim() || null, contract_value: parseFloat(document.getElementById('cV').value) || null, email: document.getElementById('cE').value.trim() || null, phone: document.getElementById('cP').value.trim() || null}).then(loadClients);
+  document.getElementById('cN').value = ''; document.getElementById('cC').value = ''; document.getElementById('cV').value = '';
+}
+
+// ============================================================
+// CONTACTS
+// ============================================================
+function loadContacts() {
+  sbGet('cipher_contacts', 'is_active=eq.true&order=name.asc').then(function(d) {
+    var el = document.getElementById('conOut');
+    if (!Array.isArray(d) || !d.length) { el.innerHTML = '<div class="empty">NO CONTACTS LOGGED</div>'; return; }
+    var cc = {FAMILY: 'br', FRIEND: 'bgo', CLIENT: 'bg', VENDOR: 'bb', PARTNER: 'bb'};
+    el.innerHTML = (d || []).map(function(x) {
+      var ds = x.last_contact_date ? Math.floor((new Date() - new Date(x.last_contact_date)) / 86400000) : null;
+      var ov = ds !== null && ds > (x.cadence_days || 14);
+      return '<div class="card" style="' + (ov ? 'border-color:rgba(204,41,54,.4);' : '') + '"><div class="ch"><span class="ct">' + x.name + '</span><div class="brow">' + (ov ? '<span class="b br">OVERDUE</span>' : '') + '<span class="b ' + (cc[x.category] || 'bgr') + '">' + x.category + '</span></div></div><div class="cm">' + (x.phone ? 'PHONE: <span>' + x.phone + '</span> · ' : '') + 'LAST: <span>' + (ds !== null ? ds + 'd ago' : 'NOT LOGGED') + '</span></div></div>';
+    }).join('');
+  });
+}
+function addContact() {
+  var n = document.getElementById('coN').value.trim(); if (!n) return;
+  sbPost('cipher_contacts', {name: n, category: document.getElementById('coCa').value, phone: document.getElementById('coPh').value.trim() || null, email: document.getElementById('coEm').value.trim() || null, cadence_days: parseInt(document.getElementById('coCd').value) || 14}).then(loadContacts);
+  document.getElementById('coN').value = '';
+}
+
+// ============================================================
+// AI WATCH + DEFCON
+// ============================================================
+var DEFCON_COLORS = {5: 'var(--green)', 4: 'var(--green)', 3: 'var(--gold)', 2: 'orange', 1: 'var(--red2)'};
+var DEFCON_LABELS = {5: 'GREEN — NORMAL OPERATIONS', 4: 'YELLOW — ELEVATED MONITORING', 3: 'ORANGE — ACTIVE THREAT', 2: 'RED — CRITICAL INCIDENT', 1: 'BLACK — ELARA 3 MOMENT'};
+
+function loadWatch() { loadDefcon(); loadThreats(); }
+
+function loadDefcon() {
+  if (!localOnline) return;
+  cipherFetch(LOCAL +'/watch/defcon').then(function(r) { return r.json(); }).then(function(d) {
+    var lvl = d.level || 5;
+    DEFCON_LEVEL = lvl;
+    var col = DEFCON_COLORS[lvl] || 'var(--green)';
+    document.getElementById('defconBlock').style.borderColor = col;
+    document.getElementById('defconNum').textContent = lvl;
+    document.getElementById('defconNum').style.color = col;
+    document.getElementById('defconLabel').textContent = DEFCON_LABELS[lvl] || '';
+    document.getElementById('defconLabel').style.color = col;
+    document.getElementById('defconReason').textContent = d.reason || '';
+    document.getElementById('defconDot').style.background = col;
+  }).catch(function() {});
+}
+
+function loadThreats() {
+  if (!localOnline) { document.getElementById('threatsOut').innerHTML = '<div class="empty">SERVER REQUIRED</div>'; return; }
+  cipherFetch(LOCAL +'/watch/threats').then(function(r) { return r.json(); }).then(function(d) {
+    var el = document.getElementById('threatsOut');
+    var threats = d.threats || [];
+    if (!threats.length) { el.innerHTML = '<div class="empty">NO THREATS LOGGED</div>'; return; }
+    var tlc = {GREEN: 'bg', YELLOW: 'bgo', ORANGE: 'br', RED: 'br', BLACK: 'br'};
+    el.innerHTML = threats.map(function(t) {
+      return '<div class="card tl-' + t.threat_level + '"><div class="ch"><span class="ct">' + t.title + '</span><div class="brow"><span class="b ' + (tlc[t.threat_level] || 'bgr') + '">' + t.threat_level + '</span><span class="b bgr">' + t.category.replace('_', ' ') + '</span></div></div><div class="cm">' + t.description + '</div>' + (t.cipher_recommendation ? '<div class="cm" style="margin-top:4px;color:var(--blue2);">CIPHER: <span style="color:var(--text);">' + t.cipher_recommendation + '</span></div>' : '') + '</div>';
+    }).join('');
+  }).catch(function() { document.getElementById('threatsOut').innerHTML = '<div class="empty">FETCH ERROR</div>'; });
+}
+
+function addThreat() {
+  var t = document.getElementById('wtT').value.trim(), desc = document.getElementById('wtD').value.trim();
+  if (!t || !desc) return;
+  cipherFetch(LOCAL +'/watch/threat', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({title: t, description: desc, threat_level: document.getElementById('wtL').value, category: document.getElementById('wtC').value})})
+    .then(function() { document.getElementById('wtT').value = ''; document.getElementById('wtD').value = ''; loadThreats(); });
+}
+
+function escalate() {
+  var newLvl = Math.max(1, DEFCON_LEVEL - 1);
+  var reason = prompt('Escalate to DEFCON ' + newLvl + '. Reason:');
+  if (!reason) return;
+  cipherFetch(LOCAL +'/watch/escalate', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({level: newLvl, reason: reason})})
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      loadDefcon();
+      var pbText = '';
+      if (d.playbook && d.playbook.steps) {
+        var steps = Array.isArray(d.playbook.steps) ? d.playbook.steps : JSON.parse(d.playbook.steps || '[]');
+        pbText = '\n\n**PLAYBOOK: ' + d.playbook.title + '**\n' +
+          steps.map(function(s) { return s.step + '. ' + s.action; }).join('\n');
+      }
+      appendMsg('cipher', '**DEFCON ESCALATED TO ' + newLvl + '**\n\nReason: ' + reason + '\n\nElara 3 Protocol active. Monitoring elevated.' + pbText, [], 'defcon');
+      scrollMsgs();
+      if (autoSpeak) speakText('DEFCON escalated to ' + newLvl + '. ' + reason);
+    });
+}
+
+function deescalate() {
+  var newLvl = Math.min(5, DEFCON_LEVEL + 1);
+  cipherFetch(LOCAL +'/watch/escalate', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({level: newLvl, reason: 'Manual stand-down — threat resolved'})})
+    .then(function() { loadDefcon(); });
+}
+
+function runScan() {
+  if (!localOnline) return;
+  document.getElementById('scanOut').style.display = 'block';
+  document.getElementById('scanBody').textContent = 'SCANNING THREAT LANDSCAPE...';
+  cipherFetch(LOCAL +'/watch/scan', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{}'})
+    .then(function(r) { return r.json(); })
+    .then(function(d) { document.getElementById('scanBody').innerHTML = '<strong>QUERY:</strong> ' + d.query + '<br><br>' + fmt(d.cipher_analysis || 'No analysis'); })
+    .catch(function(e) { document.getElementById('scanBody').textContent = 'SCAN FAILED: ' + e.message; });
+}
+
+// ============================================================
+// PETS
+// ============================================================
+function loadPets() {
+  sbGet('cipher_pets', 'is_active=eq.true').then(function(d) {
+    var em = {Cat: '🐱', Dog: '🐶'};
+    document.getElementById('petsOut').innerHTML = '<div class="pg">' + (Array.isArray(d) ? d : []).map(function(p) {
+      return '<div class="pc"><div style="font-size:32px;margin-bottom:6px;">' + (em[p.species] || '🐾') + '</div><div class="ct" style="text-align:center;">' + p.name + '</div><div style="font-family:var(--mono);font-size:10px;color:var(--text2);margin-top:4px;">' + (p.breed || p.species) + '</div>' + (p.last_vet_visit ? '<div style="font-family:var(--mono);font-size:9px;color:var(--text2);margin-top:8px;">LAST VET: ' + p.last_vet_visit + '</div>' : '<div style="font-family:var(--mono);font-size:9px;color:var(--red2);margin-top:8px;">VET DATE NOT LOGGED</div>') + (p.next_vet_due ? '<div style="font-family:var(--mono);font-size:9px;color:var(--green);margin-top:4px;">NEXT: ' + p.next_vet_due + '</div>' : '') + '<div class="ca" style="justify-content:center;margin-top:10px;"><button class="bx p" onclick="logVet(\'' + p.id + '\')">LOG VET</button></div></div>';
+    }).join('') + '</div>';
+  });
+}
+function logVet(id) {
+  var d = prompt('Vet visit date (YYYY-MM-DD):'); if (!d) return;
+  var nd = prompt('Next due date (YYYY-MM-DD):');
+  sbPatch('cipher_pets', id, {last_vet_visit: d, next_vet_due: nd || null}).then(loadPets);
+}
+
+// ============================================================
+// MEMORY
+// ============================================================
+function loadMem(q) {
+  var params = q ? 'content=ilike.*' + encodeURIComponent(q) + '*&is_active=eq.true&order=created_at.desc' : 'is_active=eq.true&order=created_at.desc&limit=40';
+  sbGet('cipher_memory_chunks', params).then(function(d) {
+    var el = document.getElementById('memOut');
+    if (!Array.isArray(d) || !d.length) { el.innerHTML = '<div class="empty">NO MEMORIES FOUND</div>'; return; }
+    var cc = {business: 'bb', decision: 'br', finance: 'bgo', life: 'bg', health: 'bgr', relationship: 'bgo', flag: 'br'};
+    el.innerHTML = (d || []).map(function(m) {
+      return '<div class="mc"><div class="mcat b ' + (cc[m.category] || 'bgr') + '">' + m.category.toUpperCase() + '</div><div><div style="font-size:13px;line-height:1.5;">' + (m.summary || m.content).substring(0, 250) + '</div><div style="font-family:var(--mono);font-size:9px;color:var(--text2);margin-top:3px;">' + new Date(m.created_at).toLocaleString() + ' · ' + (m.source || 'manual') + '</div></div></div>';
+    }).join('');
+  });
+}
+function searchMem() { loadMem(document.getElementById('mSrch').value.trim()); }
+function addMem() {
+  var c = document.getElementById('mC').value.trim(); if (!c) return;
+  sbPost('cipher_memory_chunks', {content: c, category: document.getElementById('mCat').value, source: 'manual', confidence_score: 1.0}).then(function() { document.getElementById('mC').value = ''; loadMem(); });
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+var SETTINGS_KEYS = {
+  ollamaUrl:    'cipher_ollama_url',
+  port:         'cipher_port',
+  model:        'cipher_model',
+  cloudModel:   'cipher_cloud_model',
+  anthKey:      'cipher_anth_key',
+  cipherKey:    'cipher_api_key',
+  embedModel:   'cipher_embed_model',
+  rateLimitRpm: 'cipher_rate_limit'
+};
+
+function loadSettings() {
+  document.getElementById('set-ollama').value      = localStorage.getItem(SETTINGS_KEYS.ollamaUrl)    || 'http://localhost:11434';
+  document.getElementById('set-port').value         = localStorage.getItem(SETTINGS_KEYS.port)         || '3131';
+  document.getElementById('set-model').value        = localStorage.getItem(SETTINGS_KEYS.model)        || '';
+  document.getElementById('set-cloud-model').value  = localStorage.getItem(SETTINGS_KEYS.cloudModel)   || 'claude-sonnet-4-6';
+  document.getElementById('set-anth-key').value     = localStorage.getItem(SETTINGS_KEYS.anthKey)      || '';
+  document.getElementById('set-cipher-key').value   = localStorage.getItem(SETTINGS_KEYS.cipherKey)    || '';
+  document.getElementById('set-embed').value        = localStorage.getItem(SETTINGS_KEYS.embedModel)   || 'nomic-embed-text';
+  document.getElementById('set-rate').value         = localStorage.getItem(SETTINGS_KEYS.rateLimitRpm) || '30';
+  loadSysInfo();
+}
+
+function saveSettings() {
+  var port = document.getElementById('set-port').value.trim() || '3131';
+  localStorage.setItem(SETTINGS_KEYS.ollamaUrl,    document.getElementById('set-ollama').value.trim() || 'http://localhost:11434');
+  localStorage.setItem(SETTINGS_KEYS.port,         port);
+  localStorage.setItem(SETTINGS_KEYS.model,        document.getElementById('set-model').value.trim());
+  localStorage.setItem(SETTINGS_KEYS.cloudModel,   document.getElementById('set-cloud-model').value.trim() || 'claude-sonnet-4-6');
+  localStorage.setItem(SETTINGS_KEYS.anthKey,      document.getElementById('set-anth-key').value.trim());
+  localStorage.setItem(SETTINGS_KEYS.cipherKey,    document.getElementById('set-cipher-key').value.trim());
+  localStorage.setItem(SETTINGS_KEYS.embedModel,   document.getElementById('set-embed').value.trim() || 'nomic-embed-text');
+  localStorage.setItem(SETTINGS_KEYS.rateLimitRpm, document.getElementById('set-rate').value || '30');
+  // Apply immediately
+  LOCAL = 'http://localhost:' + port;
+  CIPHER_API_KEY = localStorage.getItem(SETTINGS_KEYS.cipherKey) || '';
+  document.getElementById('setStatus').innerHTML = '<span style="color:var(--green);">✓ SAVED — reconnecting...</span>';
+  setTimeout(function() {
+    checkLocal();
+    document.getElementById('setStatus').innerHTML = '<span style="color:var(--text2);">Settings applied.</span>';
+  }, 800);
+}
+
+function loadSysInfo() {
+  if (!localOnline) { document.getElementById('sysInfo').textContent = 'SERVER OFFLINE'; return; }
+  cipherFetch(LOCAL + '/status').then(function(r) { return r.json(); }).then(function(d) {
+    document.getElementById('sysInfo').innerHTML =
+      'ENGINE: <span style="color:var(--text);">' + (d.active_model || 'NONE') + '</span><br>' +
+      'OLLAMA: <span style="color:' + (d.ollama_online ? 'var(--green)' : 'var(--red2)') + ';">' + (d.ollama_online ? 'ONLINE' : 'OFFLINE') + '</span><br>' +
+      'CLOUD FALLBACK: <span style="color:var(--text);">' + (d.cloud_fallback ? 'ENABLED' : 'DISABLED') + '</span><br>' +
+      'SEMANTIC MEMORY: <span style="color:' + (d.semantic_memory ? 'var(--green)' : 'var(--text2)') + ';">' + (d.semantic_memory ? 'ACTIVE — ' + (d.embed_model || '') : 'OFF — run: ollama pull nomic-embed-text') + '</span><br>' +
+      'AUTH: <span style="color:var(--text);">' + (d.auth_enabled ? 'API KEY REQUIRED' : 'OPEN (local mode)') + '</span><br>' +
+      'MODELS INSTALLED: <span style="color:var(--text);">' + (d.available_models || []).join(', ') + '</span>';
+  }).catch(function() {});
+}
+
+// wire settings panel load
+var _origNav = nav;
+nav = function(name, btn) {
+  _origNav(name, btn);
+  if (name === 'settings') loadSettings();
+};
+
+// ============================================================
+// EXPORT CONVERSATION
+// ============================================================
+function exportChat(fmt) {
+  fmt = fmt || 'md';
+  var msgs = document.querySelectorAll('#chatMsgs .msg');
+  if (!msgs.length) { alert('No conversation to export.'); return; }
+  var lines = [];
+  var ts = new Date().toISOString().slice(0,19).replace('T',' ');
+
+  if (fmt === 'json') {
+    var out = history.map(function(m) { return {role: m.role, content: m.content, timestamp: ts}; });
+    _download('cipher-export-' + Date.now() + '.json', JSON.stringify(out, null, 2), 'application/json');
+    return;
+  }
+
+  if (fmt === 'md') {
+    lines.push('# Cipher Sovereign — Conversation Export');
+    lines.push('**Exported:** ' + ts + '\n');
+    history.forEach(function(m) {
+      var who = m.role === 'user' ? '## 👤 JAY' : '## ⬡ CIPHER';
+      lines.push(who);
+      lines.push(m.content);
+      lines.push('');
+    });
+    _download('cipher-export-' + Date.now() + '.md', lines.join('\n'), 'text/markdown');
+    return;
+  }
+
+  // txt
+  history.forEach(function(m) {
+    lines.push((m.role === 'user' ? 'JAY' : 'CIPHER') + ': ' + m.content);
+    lines.push('');
+  });
+  _download('cipher-export-' + Date.now() + '.txt', lines.join('\n'), 'text/plain');
+}
+
+function _download(filename, content, mime) {
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], {type: mime}));
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ============================================================
+// UPGRADE MODELS (from settings panel)
+// ============================================================
+function upgradeModels() {
+  if (!localOnline) { document.getElementById('setStatus').innerHTML = '<span style="color:var(--red2);">SERVER OFFLINE</span>'; return; }
+  document.getElementById('setStatus').innerHTML = '<span style="color:var(--gold);">CHECKING AVAILABLE UPGRADES...</span>';
+  cipherFetch(LOCAL + '/upgrade/check').then(function(r) { return r.json(); }).then(function(d) {
+    var missing = d.missing || [];
+    if (!missing.length) {
+      document.getElementById('setStatus').innerHTML = '<span style="color:var(--green);">✓ ALL RECOMMENDED MODELS INSTALLED</span>';
+      return;
+    }
+    var pulls = missing.map(function(m) {
+      return cipherFetch(LOCAL + '/upgrade/pull', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({model: m.model})});
+    });
+    Promise.all(pulls).then(function() {
+      document.getElementById('setStatus').innerHTML = '<span style="color:var(--green);">↓ PULLING ' + missing.length + ' MODEL(S) IN BACKGROUND</span>';
+    });
+  });
+}
+</script>
+</body>
+</html>
