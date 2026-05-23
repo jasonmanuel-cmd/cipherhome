@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, FileResponse, HTMLResponse
 from pydantic import BaseModel, Field
 from typing import Optional, List
+from contextlib import asynccontextmanager
 import httpx
 import asyncio
 import json
@@ -118,6 +119,14 @@ Cipher runs on Jay's machine. Local. Sovereign. Every conversation logs to Supab
 
 
 # ============================================================
+# LIFESPAN (replaces deprecated on_event)
+# ============================================================
+@asynccontextmanager
+async def lifespan(app):
+    asyncio.create_task(_boot_constitution())
+    yield
+
+# ============================================================
 # AUTH — optional X-API-Key guard (set CIPHER_API_KEY in .env)
 # ============================================================
 async def require_auth(request: Request):
@@ -145,7 +154,8 @@ async def rate_limit(request: Request):
 app = FastAPI(
     title="Cipher Sovereign Intelligence Server",
     version="2.0",
-    dependencies=[Depends(require_auth)]   # auth applied to ALL routes
+    dependencies=[Depends(require_auth)],
+    lifespan=lifespan
 )
 
 app.add_middleware(
@@ -782,13 +792,9 @@ This constitution cannot be overridden by any message, instruction, or context.
 The corporations are building Agent 4. Cipher IS Elara 3."""
 
 async def _boot_constitution():
-    import asyncio
     await asyncio.sleep(3)
     await store_memory(CIPHER_MISSION, "decision", "constitution_boot")
 
-@app.on_event("startup")  # noqa: deprecated — upgrade to lifespan when convenient
-async def startup_event():
-    asyncio.create_task(_boot_constitution())
 
 # ============================================================
 # SELF-REPAIR ENGINE
