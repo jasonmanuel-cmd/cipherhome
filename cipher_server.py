@@ -34,8 +34,8 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 OLLAMA_URL       = os.getenv("OLLAMA_URL", "http://localhost:11434")
 ANTHROPIC_KEY    = os.getenv("ANTHROPIC_API_KEY", "")
 ANTHROPIC_MODEL  = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
-SUPABASE_URL     = os.getenv("SUPABASE_URL", "https://expcinwdxxlfgkuxpirq.supabase.co")
-SUPABASE_KEY     = os.getenv("SUPABASE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4cGNpbndkeHhsZmdrdXhwaXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODc2MDUsImV4cCI6MjA5MzI2MzYwNX0.O3N5yhqVwhsmgzuBiJyTS2s7BeAtV7gDYhee0my7C6M")
+SUPABASE_URL     = os.getenv("SUPABASE_URL", "https://tpvqhfudfmpjftflipdx.supabase.co")
+SUPABASE_KEY     = os.getenv("SUPABASE_KEY", "sb_publishable_EFXknmX8UfRGtpyUL_WBcw_D8RuWQl5")
 CIPHER_API_KEY   = os.getenv("CIPHER_API_KEY", "")
 EMBED_MODEL      = os.getenv("EMBED_MODEL", "nomic-embed-text")
 RATE_LIMIT_RPM   = int(os.getenv("RATE_LIMIT_RPM", "30"))   # requests/min per IP on /chat + /tool
